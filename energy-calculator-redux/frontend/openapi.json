@@ -1,0 +1,776 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/appliances": {
+      "get": {
+        "operationId": "getAppliances",
+        "parameters": [
+          {
+            "name": "minPower",
+            "required": false,
+            "in": "query",
+            "description": "Минимальная мощность, Вт",
+            "schema": {
+              "minimum": 0,
+              "example": 100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApplianceResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "summary": "Список опубликованных приборов с фильтрацией",
+        "tags": [
+          "Приборы"
+        ]
+      },
+      "post": {
+        "operationId": "createAppliance",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "applianceName",
+                  "image",
+                  "video"
+                ],
+                "properties": {
+                  "applianceName": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "example": "Новый чайник"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "video": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Обновлён существующий черновик",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApplianceResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApplianceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Далее: создать или обновить черновик с файлами",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/appliances/feed": {
+      "get": {
+        "operationId": "getApplianceFeed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplianceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "summary": "Первая опубликованная карточка ленты",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/appliances/feed/{id}": {
+      "get": {
+        "operationId": "getApplianceFeedById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "true — перейти к следующей карточке",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplianceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "summary": "Карточка по ID или следующая карточка",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/appliances/draft": {
+      "get": {
+        "operationId": "getApplianceDraft",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplianceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Получить черновик текущего пользователя",
+        "tags": [
+          "Приборы"
+        ]
+      },
+      "put": {
+        "operationId": "publishAppliance",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishApplianceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplianceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Опубликовать черновик",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/appliances/{id}": {
+      "delete": {
+        "operationId": "deleteAppliance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "403": {
+            "description": "Нельзя удалить чужой прибор"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Логически удалить свой прибор",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/appliances/{id}/like": {
+      "post": {
+        "operationId": "setApplianceLike",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LikeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "applianceId": {
+                      "type": "integer"
+                    },
+                    "value": {
+                      "type": "integer",
+                      "enum": [
+                        0,
+                        1
+                      ]
+                    },
+                    "likesCount": {
+                      "type": "integer"
+                    },
+                    "isLiked": {
+                      "type": "integer",
+                      "enum": [
+                        0,
+                        1
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные параметры или тело запроса"
+          },
+          "401": {
+            "description": "Требуется вход"
+          },
+          "404": {
+            "description": "Прибор или черновик не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Поставить или снять лайк",
+        "tags": [
+          "Приборы"
+        ]
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "operationId": "UserController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Имя или почта уже заняты"
+          }
+        },
+        "summary": "Зарегистрировать пользователя",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "operationId": "UserController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "sessionId; HttpOnly; SameSite=Lax; Path=/"
+              }
+            },
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неверная почта или пароль"
+          }
+        },
+        "summary": "Войти: создать сессию Redis и установить cookie sessionId",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "operationId": "UserController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Вы вышли из аккаунта"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Сессия отсутствует или истекла"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Выйти: удалить сессию Redis и очистить cookie",
+        "tags": [
+          "Пользователи"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Каталог приборов",
+    "description": "",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionId"
+      }
+    },
+    "schemas": {
+      "ApplianceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "applianceName": {
+            "type": "string",
+            "example": "Новый чайник"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/appliances/image-example.png"
+          },
+          "videoUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/appliances/video-example.mp4"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationStatus": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "deleted"
+            ]
+          },
+          "powerWatts": {
+            "type": "number",
+            "nullable": true,
+            "example": 2200
+          },
+          "minTemperature": {
+            "type": "number",
+            "nullable": true,
+            "example": 5
+          },
+          "imageFileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "videoFileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "likesCount": {
+            "type": "number",
+            "example": 0
+          },
+          "isOwner": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "example": 0
+          },
+          "isLiked": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "formattedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "applianceName",
+          "imageUrl",
+          "videoUrl",
+          "description",
+          "publicationStatus",
+          "powerWatts",
+          "minTemperature",
+          "imageFileName",
+          "videoFileName",
+          "likesCount",
+          "isOwner",
+          "isLiked",
+          "createdAt",
+          "formattedAt"
+        ]
+      },
+      "CreateApplianceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "applianceName": {
+            "type": "string",
+            "example": "Новый чайник"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/appliances/image-example.png"
+          },
+          "videoUrl": {
+            "type": "string",
+            "example": "http://localhost:9000/appliances/video-example.mp4"
+          }
+        },
+        "required": [
+          "id",
+          "applianceName",
+          "imageUrl",
+          "videoUrl"
+        ]
+      },
+      "PublishApplianceDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "Чайник для кипячения воды"
+          },
+          "powerWatts": {
+            "type": "number",
+            "example": 2200,
+            "minimum": 0,
+            "description": "Мощность, Вт"
+          },
+          "minTemperature": {
+            "type": "number",
+            "example": 5,
+            "description": "Минимальная температура, °C"
+          }
+        },
+        "required": [
+          "description",
+          "powerWatts",
+          "minTemperature"
+        ]
+      },
+      "LikeDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "example": 1,
+            "enum": [
+              0,
+              1
+            ]
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "RegisterUserDto": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "example": "student",
+            "maxLength": 128
+          },
+          "email": {
+            "type": "string",
+            "example": "student@example.com",
+            "maxLength": 64
+          },
+          "password": {
+            "type": "string",
+            "example": "example-password",
+            "maxLength": 64,
+            "format": "password"
+          }
+        },
+        "required": [
+          "userName",
+          "email",
+          "password"
+        ]
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number",
+            "example": 1
+          },
+          "userName": {
+            "type": "string",
+            "example": "demo"
+          },
+          "email": {
+            "type": "string",
+            "example": "demo@example.com"
+          }
+        },
+        "required": [
+          "userId",
+          "userName",
+          "email"
+        ]
+      },
+      "LoginUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "demo@example.com",
+            "maxLength": 64
+          },
+          "password": {
+            "type": "string",
+            "example": "demo",
+            "format": "password",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      }
+    }
+  }
+}
